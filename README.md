@@ -19,6 +19,7 @@ MATLAB implementation of pricing engines for plain-vanilla and exotic options, w
 
 **Convergence & Error Scaling**  
 CRR error scales as O(1/M) and MC as O(1/√M), confirmed on a log-log scale. The CRR error oscillates around the convergence envelope — a well-known artifact of the strike drifting in and out of alignment with tree nodes as M varies. Using a market bid/ask tolerance of 0.5 bp as threshold, CRR becomes reliably stable at M = 2⁷ = 128 steps, while MC requires M = 2²⁰ ≈ 1M simulations. The binomial tree converges orders of magnitude faster for plain-vanilla European options.
+![CRR Tree Error Convergence](img/CRR_tree_error_convergence.png)
 
 **Vega of the Up&Out Barrier Option**  
 The Vega profile has a sign change that is financially meaningful. When S₀ is far from the barrier, the option behaves like a vanilla call — higher volatility increases the probability of finishing ITM, so Vega is positive. As S₀ approaches 1.40 €, Vega turns sharply negative: in this region, volatility is the enemy of the option holder because it increases the probability of breaching the barrier and being knocked out. This sign reversal is not a numerical artifact — it reflects a genuine change in the dominant risk driver.  
