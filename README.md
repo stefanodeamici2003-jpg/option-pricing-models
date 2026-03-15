@@ -1,20 +1,45 @@
-# Financial Engineering: Derivatives Pricing & Numerical Analysis
+# Option Pricing Models
 
-## Project Overview
-[cite_start]This repository contains the implementation and numerical analysis of pricing models for plain-vanilla and exotic derivatives[cite: 607, 609]. [cite_start]The project evaluates convergence rates, computational stabilities, and financial sensitivities (Greeks) of various numerical methods[cite: 607, 608, 609].
+MATLAB implementation of pricing engines for plain-vanilla and exotic options, with convergence analysis and Greeks computation.  
+*Financial Engineering — MSc Quantitative Finance, Politecnico di Milano (A.Y. 2025–2026)*
 
-## Mathematical Models & Methodologies
-* [cite_start]**Closed-Form Solutions**: Standard Black-Scholes framework for European options and the Bachelier (Normal) model for forward prices assuming negative values ($dF_t = \sigma_N dW_t$)[cite: 864, 866, 871].
-* [cite_start]**Cox-Ross-Rubinstein (CRR) Binomial Trees**: Discrete-time pricing implementations for European, American, Barrier (Up-and-Out), and Bermudan options[cite: 607, 609, 684, 822].
-* [cite_start]**Monte Carlo (MC) Simulations**: Risk-neutral path generation for European and path-dependent barrier options, enhanced with variance reduction techniques[cite: 607, 686, 792].
+---
 
-## Key Results & Financial Analysis
-* [cite_start]**Error Scaling & Convergence**: Demonstrated empirically on a log-log scale that the numerical pricing error for European Calls scales as $1/M$ for the CRR tree and $1/\sqrt{M}$ for the MC approach[cite: 645, 646, 671, 672]. [cite_start]To meet a market bid/ask tolerance of $0.5 \cdot 10^{-4}$ (0.5 bp), the MC approach required $M=2^{20}$ simulations[cite: 634, 635, 639].
-* [cite_start]**Barrier Options & Computational Instability**: Priced European Up&Out options and analyzed Vega sensitivity, noting a sign change as the underlying approaches the barrier[cite: 692, 695, 698]. [cite_start]Identified and explained the "sawtooth" effect—a severe computational instability in CRR Greek calculations caused by the discrete barrier payoff discontinuity expanding over the tree grid[cite: 730, 736, 737].
-* [cite_start]**American vs. European Dynamics**: Showed that continuous barrier monitoring makes the American Up&Out Call strictly cheaper ($0.0147$ Euro) than its European counterpart ($0.0154$ Euro)[cite: 744, 746, 747, 752]. [cite_start]The Delta drops to exactly zero when the underlying hits the Knock-Out level ($S_0 \ge 1.4$)[cite: 780, 781].
-* [cite_start]**Early Exercise Premium**: Compared Bermudan and European Calls, proving that when the risk-free rate ($2.5\%$) strictly exceeds the continuous dividend yield ($2\%$), the early exercise premium is near zero, making early exercise suboptimal[cite: 829, 830, 856].
-* [cite_start]**Variance Reduction**: Successfully implemented the antithetic variables technique, exploiting the martingale property of the Wiener process to generate symmetric paths and reduce the standard error of the MC estimator[cite: 792, 793, 794, 795].
+## Methods
 
-## Technologies & Libraries
-* [cite_start]**Languages**: Python, MATLAB[cite: 610, 625].
-* [cite_start]**Libraries**: NumPy, Pandas, Matplotlib, SciPy, and QuantLib (used for standard 30/360 year fractions and Modified Following schedules)[cite: 610, 960, 963].
+**Black-76 Closed Form** — used as the analytical benchmark. Prices are derived under the T-forward measure, where the forward price F₀ follows a GBM. For barrier options, the closed form decomposes as `Call(K) − Call(KO) − (KO − K) · Digital(KO)`, exploiting the linear structure of the truncated payoff.
+
+**CRR Binomial Tree** — discrete-time lattice with up/down factors `u = exp(σ√dt)`, `d = 1/u` and risk-neutral probability `p = (1−d)/(u−d)`. Option values are recovered via backward induction. For barrier options, terminal nodes above the KO level are zeroed before induction. For the Bermudan, early exercise is tested at each exercise date by comparing continuation value against intrinsic value.
+
+**Monte Carlo** — risk-neutral simulation of the terminal forward price under the log-normal dynamics. Variance is reduced via antithetic variables: for each draw Z, a symmetric path −Z is generated, exploiting the martingale property of the Wiener process to cancel odd-moment noise and reduce the estimator variance without additional random draws.
+
+---
+
+## Key Results
+
+**Convergence & Error Scaling**  
+CRR error scales as O(1/M) and MC as O(1/√M), confirmed on a log-log scale. The CRR error oscillates around the convergence envelope — a well-known artifact of the strike drifting in and out of alignment with tree nodes as M varies. Using a market bid/ask tolerance of 0.5 bp as threshold, CRR becomes reliably stable at M = 2⁷ = 128 steps, while MC requires M = 2²⁰ ≈ 1M simulations. The binomial tree converges orders of magnitude faster for plain-vanilla European options.
+
+**Vega of the Up&Out Barrier Option**  
+The Vega profile has a sign change that is financially meaningful. When S₀ is far from the barrier, the option behaves like a vanilla call — higher volatility increases the probability of finishing ITM, so Vega is positive. As S₀ approaches 1.40 €, Vega turns sharply negative: in this region, volatility is the enemy of the option holder because it increases the probability of breaching the barrier and being knocked out. This sign reversal is not a numerical artifact — it reflects a genuine change in the dominant risk driver.  
+On the numerical side, computing Vega via central finite differences on the CRR tree produces severe "sawtooth" oscillations near the barrier. A small perturbation Δσ expands the tree grid, causing previously safe nodes to breach the barrier discontinuously — a sharp drop in option value that, divided by a small Δσ, generates massive spikes in the estimated derivative. The Monte Carlo avoids this by reusing the same set of random draws for both σ+h and σ−h, keeping the two estimates correlated and the finite difference well-behaved.
+
+**American vs. European Barrier**  
+The American Up&Out Call (0.0147 €) is strictly cheaper than the European (0.0154 €). The reason is structural: the European barrier is checked only at maturity, so a path that crosses 1.40 € intralife and falls back below it by expiry survives and pays off. The American barrier kills the option on first touch — continuous monitoring makes knock-out strictly more likely, destroying value. The Delta of the American option drops discontinuously to zero at S₀ = 1.40 € (immediate knock-out), while the European Delta is smooth through the barrier level.
+
+**Bermudan vs. European Call**  
+With exercise dates at months 1, 2, and 3, the Bermudan price matches the European (0.0163 €) throughout the relevant dividend range. This is consistent with theory: early exercise on a call is only optimal when the dividend yield q is high enough to compensate for the time value of money lost by paying the strike early. Here r = 2.5% > q = 2%, so the interest earned on the unpaid strike dominates — the rational holder never exercises early, making the Bermudan financially equivalent to the European contract.
+
+---
+
+## How to Run
+
+```matlab
+addpath('/path/to/option-pricing-models')
+runAssignment1_Group6
+```
+Requires MATLAB Financial Toolbox (`blkprice`, `normcdf`).
+
+---
+
+**Stefano De Amici** · [LinkedIn](https://linkedin.com/in/stefano-de-amici-7b84a0238)
