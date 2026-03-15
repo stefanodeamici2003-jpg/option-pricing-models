@@ -1,8 +1,3 @@
-% Assignment_1
-%  Group 6, AA2025-2026
-%
-%  
-
 %% Pricing parameters
 S0=1;
 K=1.1;
