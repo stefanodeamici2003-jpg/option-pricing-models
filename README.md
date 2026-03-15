@@ -11,7 +11,7 @@ MATLAB implementation of pricing engines for plain-vanilla and exotic options, w
 
 **CRR Binomial Tree** — discrete-time lattice with up/down factors `u = exp(σ√dt)`, `d = 1/u` and risk-neutral probability `p = (1−d)/(u−d)`. Option values are recovered via backward induction. For barrier options, terminal nodes above the KO level are zeroed before induction. For the Bermudan, early exercise is tested at each exercise date by comparing continuation value against intrinsic value.
 
-**Monte Carlo** — risk-neutral simulation of the terminal forward price under the log-normal dynamics. Variance is reduced via antithetic variables: for each draw Z, a symmetric path −Z is generated, exploiting the martingale property of the Wiener process to cancel odd-moment noise and reduce the estimator variance without additional random draws.
+**Monte Carlo** — risk-neutral simulation of the terminal forward price under the log-normal dynamics. Variance is reduced via antithetic variables: for each draw Z, a symmetric path −Z is generated, exploiting the martingale property of the Wiener process to reduce the variance without additional random draws.
 
 ---
 
