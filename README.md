@@ -36,7 +36,7 @@ With exercise dates at months 1, 2, and 3, the Bermudan price matches the Europe
 
 ```matlab
 addpath('/path/to/option-pricing-models')
-runAssignment1_Group6
+runMain
 ```
 Requires MATLAB Financial Toolbox (`blkprice`, `normcdf`).
 
