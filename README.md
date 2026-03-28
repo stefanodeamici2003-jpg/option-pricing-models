@@ -41,5 +41,3 @@ runMain
 Requires MATLAB Financial Toolbox (`blkprice`, `normcdf`).
 
 ---
-
-**Stefano De Amici** · [LinkedIn](https://linkedin.com/in/stefano-de-amici-7b84a0238)
